@@ -1,0 +1,8 @@
+*
+!/.gitignore.d
+!/.gitignore.d/i3
+!/.i3
+!/.i3/autostart
+!/.i3/config
+!/.i3/i3status.conf
+!/.i3/lock.sh
