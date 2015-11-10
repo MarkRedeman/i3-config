@@ -8,6 +8,3 @@ xset -b &
 
 ## DPMS monitor setting (standby -> suspend -> off) (seconds)
 xset dpms 300 900 1800 &
-
-# Not sure if i should use it, but it will activate my fn keys:
-gnome-settings-daemon &

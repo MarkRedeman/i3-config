@@ -222,4 +222,6 @@ exec --no-startup-id nm-applet
 # Set wallpapaer
 #exec --no-startup-id feh --bg-scale ~/Pictures/procrastinators-unite-tomorrow-wallpaper.png
 
+# Not sure if i should use it, but it will activate my fn keys:
+exec --no-startup-id gnome-settings-daemon
 exec --no-startup-id  ~/.i3/autostart
