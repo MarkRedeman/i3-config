@@ -1,58 +1,44 @@
 #!/bin/zsh
-
-icon="$HOME/.i3/assets/lock-icon.png"
-
-# Output help page.
-function _help() {
-cat <<EOH
-usage: lockmyi3 [-h] [-p <size=20>] [options]...
-
-Locks your screen with i3lock, using a pixelated version of the current screen
-as the background.
-
-Options:
-  -p <size=20> -- Set the the size of each blocky pixel to <size> (in pixels).
-  options      -- Options that are passed through to i3lock.
-EOH
-}
+set -e
 
 # Helper to calculate simple expressions.
 function _calc() {
     bc -q <<<"$1"
 }
 
-# Get the options.
-local __block_size=25
-while getopts "p:h" __opt; do
-    case "$__opt" in
-        (p)
-            __block_size="${OPTARG}"
-            ;;
-        (h)
-            _help
-            exit 0;;
-    esac
-done
+# Originally from https://github.com/FloorLamp/git-whatthecommit/blob/master/prepare-commit-msg
+function __whatthecommit(){
+  # First we grab a list of commit messages (we could possible cache this..) and then select 1 message
+  # randomly which is sanitzed
+  echo $(http GET https://raw.githubusercontent.com/ngerakines/commitment/master/commit_messages.txt \
+        | sort -R \
+        | head -n 1 \
+        | sed "s/'/\\\'/g" \
+    );
+}
 
-# Get pass-through options.
-shift $(_calc "${OPTIND}-1")
+function __lock() {
+    # Gets the (width, height) of the screen.
+    read __screen_x __screen_y <<<$(xrandr -q | grep '*' | awk '{ split($1, res, "x"); print res[1], res[2];}')
 
-# Gets the (width, height) of the screen.
-read __screen_x __screen_y <<<$(xrandr -q | grep '*' | awk '{ split($1, res, "x"); print res[1], res[2];}')
+    # Calculate the amount of pixelated blocks to show
+    # Calculate the "reduced" height and width for the down-scaling.
+    readonly __block_size=20
+    readonly __reduced_x=$(_calc "${__screen_x} / ${__block_size}")
+    readonly __reduced_y=$(_calc "${__screen_y} / ${__block_size}")
 
-# Calculate the "reduced" height and width for the down-scaling.
-local __reduced_x=$(_calc "${__screen_x}/${__block_size}")
-local __reduced_y=$(_calc "${__screen_y}/${__block_size}")
+    readonly __message=$(__whatthecommit)
+    readonly __icon="$HOME/.i3/assets/lock-icon.png"
 
-local __reduced_x_2=$(_calc "${__reduced_x} * 2")
-local __reduced_y_2=$(_calc "${__reduced_y} * 2")
+    # Actually do the locking (generate the image without temporary files to not
+    # clutter the filesystem). Since `convert -scale` doesn't do blurring, scaling
+    # down and then back up is an efficient method of producing a pixelated image.
+    i3lock $* -u -i <(import -screen -window root -silent png:- \
+        | convert png:- -scale "${__reduced_x}x${__reduced_y}" -scale "${__screen_x}x${__screen_y}" \
+          "${__icon}" -gravity center -geometry +0-50 -composite -matte \
+          -gamma 1.0,1.3,1.0 \
+          -gravity center -pointsize 50 -fill "#2ebd59" -draw "text 0,300 '"${__message}"'" png:- \
+    )
+}
 
-
-# Actually do the locking (generate the image without temporary files to not
-# clutter the filesystem). Since `convert -scale` doesn't do blurring, scaling
-# down and then back up is an efficient method of producing a pixelated image.
-i3lock $* -u -i <(import -screen -window root -silent png:- \
-        | convert png:- -scale '!'"${__reduced_x}x${__reduced_y}" -scale '!'"${__screen_x}x${__screen_y}" png:- \
-        | convert png:- "$icon" -gravity center -composite -matte png:- \
-        # | convert png:- -scale '!'"${__reduced_x_2}x${__reduced_y_2}" -scale '!'"${__screen_x}x${__screen_y}" png:- \
-        )
+__lock "$@"
