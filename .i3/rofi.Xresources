@@ -1,0 +1,29 @@
+rofi.font: Fira Code Retina 16
+rofi.width: 70
+rofi.padding: 50
+rofi.opacity: 85
+
+rofi.hide-scrollbar: true
+rofi.separator-style: none
+
+! border width, row height in chars
+rofi.bw: 10
+rofi.eh: 2
+rofi.lines: 4
+
+!! Colors
+rofi.color-enabled: true
+rofi.color-normal: #2f343f, #f3f4f5, #2f343f, #2f343f, #9575cd
+rofi.color-window: #2f343f,#002b36
+
+!!! Since in Rofi 1.0.0 the deamon mode has been removed it is probably better
+! to remove this part and rely on a hotkey deamon or i3's bindings
+!! Modi
+rofi.key-run: mod4+d
+rofi.key-Workspaces: mod4+Tab
+rofi.modi: run,Workspaces:i3_switch_workspace
+
+! I haven't been using these modi lately so I've disabled them for a while
+! rofi.key-window: mod4+Tab
+! rofi.key-ssh: mod4+shift+s
+! rofi.modi: run,window,ssh,Workspaces:i3_switch_workspace
