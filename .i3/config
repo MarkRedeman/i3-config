@@ -8,14 +8,18 @@
 # Use windows key as mod
 set $mod Mod4
 
-# Font for window titles. Will also be used by the bar unless a different font
-# is used in the bar {} block below. ISO 10646 = Unicode
-font -misc-fixed-medium-r-normal--13-120-75-75-C-70-iso10646-1
-# The font above is very space-efficient, that is, it looks good, sharp and
-# clear in small sizes. However, if you need a lot of unicode glyphs or
-# right-to-left text rendering, you should instead use pango for rendering and
-# chose a FreeType font, such as:
-font pango: Source Code Pro for Powerline Medium 11px
+set $bg-color            #2f343f
+set $inactive-bg-color   #2f343f
+set $text-color          #f3f4f5
+set $inactive-text-color #676E7D
+set $urgent-bg-color     #E53935
+
+set $www "1: "
+set $work "2: "
+set $chat "9: "
+set $music "10: "
+
+font pango: Fira Code Retina 11px
 
 # Use Mouse+$mod to drag floating windows to their wanted position
 floating_modifier $mod
@@ -53,10 +57,8 @@ bindsym $mod+Shift+space floating toggle
 bindsym $mod+space focus mode_toggle
 bindsym $mod+a focus parent
 
-set $www "1: "
-set $work "2: "
-set $chat "9: "
-set $music "10: "
+bindsym $mod+z workspace back_and_forth
+bindsym $mod+Shift+z move container to workspace back_and_forth
 
 # switch to workspace
 bindsym $mod+1 workspace $www
@@ -84,10 +86,8 @@ bindsym $mod+Shift+0 move container to workspace $music
 
 assign [class="Firefox"] $www
 assign [class="(?i)spotify"] $music
-assign [class="(?i)gnome-terminal" title="(?i)weechat"] $chat
 assign [class="google-chrome" title="Hangouts"] $chat
 
-bindsym $mod+Shift+i [class="Gnome-terminal" title="WeeChat"] focus
 bindsym $mod+d exec rofi -show run
 bindsym $mod+Tab exec rofi -show Workspaces
 # bindsym $mod+Shift+s exec rofi -show ssh
@@ -95,14 +95,17 @@ bindsym $mod+Control+l exec ~/.i3/scripts/lock
 bindsym $mod+Shift+e exec ~/.i3/scripts/shutdown_menu.sh
 
 bindsym $mod+n workspace next
-bindsym $mod+Shift+n move container to workspace next
 bindsym $mod+p workspace prev
+bindsym $mod+Shift+n move container to workspace next
 bindsym $mod+Shift+p move container to workspace prev
 
 # reload or restart the configuration file
 # restart preserves layout/session, can be used to upgrade i3
 bindsym $mod+Shift+c reload
 bindsym $mod+Shift+r restart
+
+# Take screenshot
+bindsym Print exec scrot ~/Pictures/capt-$(date '+%Y-%m-%d-%H%M%S').png
 
 # resize window (you can also use the mouse for that)
 set $resizeMode "  "
@@ -120,12 +123,6 @@ mode $resizeMode {
 }
 bindsym $mod+r mode $resizeMode
 
-set $bg-color            #2f343f
-set $inactive-bg-color   #2f343f
-set $text-color          #f3f4f5
-set $inactive-text-color #676E7D
-set $urgent-bg-color     #E53935
-
 # window colors
 #                       border              background         text                 indicator
 client.focused          $bg-color           $bg-color          $text-color          #00ff00
@@ -139,7 +136,7 @@ bindsym $mod+b bar mode invisible
 bindsym $mod+Shift+b bar mode dock
 bar {
         position top
-        font pango: Source Code Pro for Powerline Medium 10
+        font pango: Fira Code Retina 11
         tray_output primary
         separator_symbol ":"
         status_command i3blocks -c ~/.i3/i3blocks.conf
@@ -155,8 +152,6 @@ bar {
 }
 
 workspace_auto_back_and_forth yes
-bindsym $mod+z workspace back_and_forth
-bindsym $mod+Shift+z move container to workspace back_and_forth
 
 # scratchpad (currently disabled because it conflicts with other bindings)
 # bindsym $mod+m move scratchpad
@@ -165,14 +160,11 @@ bindsym $mod+Shift+z move container to workspace back_and_forth
 # thin borders
 hide_edge_borders both
 
-# Pulse Audio controls
-bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume 0 +5% #increase sound volume
-bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume 0 -5% #decrease sound volume
-bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute 0 toggle # mute sound
-
-# Sreen brightness controls
-bindsym XF86MonBrightnessUp exec xbacklight -inc 5 # increase screen brightness
-bindsym XF86MonBrightnessDown exec xbacklight -dec 5 # decrease screen brightness
+# Function key bindings
+# Pulse Audio controls (increase, decrease and mute sound)
+bindsym XF86AudioRaiseVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ +5%
+bindsym XF86AudioLowerVolume exec --no-startup-id pactl set-sink-volume @DEFAULT_SINK@ -5%
+bindsym XF86AudioMute exec --no-startup-id pactl set-sink-mute @DEFAULT_SINK@ toggle
 
 # Media player controls
 bindsym XF86AudioPlay exec playerctl play-pause
@@ -180,23 +172,28 @@ bindsym XF86AudioPause exec playerctl play-pause
 bindsym XF86AudioNext exec playerctl next
 bindsym XF86AudioPrev exec playerctl previous
 
-# Take screenshot
-bindsym Print exec scrot ~/Pictures/capt-$(date '+%Y-%m-%d-%H%M%S').png
+# Increase and decrease screen brightness controls
+bindsym XF86MonBrightnessUp exec xbacklight -inc 5
+bindsym XF86MonBrightnessDown exec xbacklight -dec 5
 
-# Replaced dmenu with Rofi and using custom lock script
-bindsym $mod+d exec rofi -show run -lines 4 -eh 2 -width 100 -padding 500 -opacity "85" -bw 0 -bc "$bg-color" -bg "$bg-color" -fg "$text-color" -hlbg "$bg-color" -hlfg "#9575cd" -font "Source Code Pro for Powerline Medium 16"
-bindsym $mod+Control+l exec ~/.i3/scripts/lock.sh
 
 # automatically start applications
 exec --no-startup-id dropbox start
 exec --no-startup-id nm-applet
 exec --no-startup-id gnome-settings-daemon
-exec --no-startup-id  ~/.i3/autostart
-# Adding: -f -D 5 will add fading
-exec --no-startup-id compton
-exec --no-startup-id i3-msg "workspace $music; exec spotify"
-exec --no-startup-id i3-msg "workspace $chat; i3-sensible-terminal -e 'weechat'"
+# exec --no-startup-id ~/.i3/scripts/battery.sh
+# Adding: -f -D 5 will add fading, but this looks strange (tearing??)
+exec --no-startup-id compton -f -D 2
 exec --no-startup-id sudo dpkg-reconfigure -f noninteractive keyboard-configuration
 
-# Set wallpapaer
+# I can probably combine all of the exec statements above into one script..
+exec --no-startup-id ~/.i3/autostart
+
+# Set wallpaper (Note that by using exec_always I can reload i3 ($mod+Shift+R)
+# so that the wallpaper will be reset)
+# Perhaps I will change this to grab a random wallpaper
 exec_always --no-startup-id feh --bg-scale ~/Pictures/ghost_nebula-wallpaper-1920x1080.jpg
+
+# Battery (https://www.reddit.com/r/Dell/comments/3v8xna/xps_13_bios_update_due_mid_dec_to_fix_pcie_nvme/)
+# exec --no-startup-id sudo tlp start
+# exec --no-stattup-id sudo powertop start
