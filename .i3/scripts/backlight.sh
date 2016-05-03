@@ -1,2 +1,3 @@
-#!/bin/zsh
-printf "%02d%%" `xbacklight`
+#!/bin/sh
+
+printf "%.0f%%\n" "$(xbacklight)"
